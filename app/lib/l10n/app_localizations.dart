@@ -190,6 +190,24 @@ abstract class AppLocalizations {
   /// **'Please choose a category and enter an amount.'**
   String get entryIncomplete;
 
+  /// No description provided for @categoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category'**
+  String get categoryRequired;
+
+  /// No description provided for @amountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount'**
+  String get amountRequired;
+
+  /// No description provided for @amountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not an amount'**
+  String get amountInvalid;
+
   /// No description provided for @category.
   ///
   /// In en, this message translates to:

@@ -61,6 +61,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get entryIncomplete => 'Bitte Kategorie wählen und Betrag eingeben.';
 
   @override
+  String get categoryRequired => 'Kategorie wählen';
+
+  @override
+  String get amountRequired => 'Betrag eingeben';
+
+  @override
+  String get amountInvalid => 'Kein gültiger Betrag';
+
+  @override
   String get category => 'Kategorie';
 
   @override

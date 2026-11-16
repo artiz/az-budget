@@ -61,6 +61,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get entryIncomplete => 'Выбери категорию и введи сумму.';
 
   @override
+  String get categoryRequired => 'Выберите категорию';
+
+  @override
+  String get amountRequired => 'Введите сумму';
+
+  @override
+  String get amountInvalid => 'Это не сумма';
+
+  @override
   String get category => 'Категория';
 
   @override
