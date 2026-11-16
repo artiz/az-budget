@@ -33,7 +33,11 @@ class _HomePageState extends State<HomePage> {
   Future<void> _newEntry() async {
     final budget = AppScope.of(context).budget;
     final day = _calendarDay.value;
-    final entry = await showEntrySheet(context, budget: budget, draft: day == null ? null : EntryDraft(date: day));
+    final entry = await showEntrySheet(
+      context,
+      budget: budget,
+      draft: day == null ? null : EntryDraft(date: day),
+    );
     if (entry == null || !mounted) return;
     await saveNewEntry(context, budget, entry);
   }
@@ -73,11 +77,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final scope = AppScope.of(context);
-    final pages = [
-      EntriesPage(budget: scope.budget, onOpenSettings: () => setState(() => _index = 2), calendarDay: _calendarDay),
-      OverviewPage(budget: scope.budget),
-      const SettingsPage(),
-    ];
+    final pages = [EntriesPage(budget: scope.budget, onOpenSettings: () => setState(() => _index = 2), calendarDay: _calendarDay), OverviewPage(budget: scope.budget), const SettingsPage()];
     return Scaffold(
       appBar: _index == 0
           ? AppBar(
@@ -88,10 +88,14 @@ class _HomePageState extends State<HomePage> {
                     height: 20,
                     decoration: BoxDecoration(color: const Color(0xFF15151A), borderRadius: BorderRadius.circular(5)),
                     alignment: Alignment.center,
-                    child: const Text('AZ', style: TextStyle(color: Color(0xFFFF2E7E), fontSize: 11, fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'AZ',
+                      style: TextStyle(color: Color(0xFFFF2E7E), fontSize: 11, fontWeight: FontWeight.w800),
+                    ),
                   ),
                   const SizedBox(width: 10),
-                  Text(l.appTitle),
+                  // Shortens on narrow phones instead of running under the buttons.
+                  Flexible(child: Text(l.appTitle, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 ],
               ),
               actions: [

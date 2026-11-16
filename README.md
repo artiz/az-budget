@@ -95,7 +95,9 @@ the bookings in the file.
    the tiles, again to unpin; pins are kept on the device), the lower half the bookings table with a
    search field, paged by 20 as you scroll. The calendar button next to the
    quick tiles switches to a **month calendar** (remembered): each day shows
-   what was spent on it, below it the day and the month so far, then the
+   its money flow with sign and currency (spending "-424 €", payday
+   "+3 200 €" in green; transfers left out), below it the day's and the
+   month's spending so far, then the
    selected day's bookings; swipe or the arrows change the month within the
    loaded year, and *+ Entry* books on the selected day. Tap a row to edit it (queued rows
    and rows already in the file alike, the file row is rewritten in place);

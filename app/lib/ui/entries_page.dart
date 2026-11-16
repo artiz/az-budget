@@ -321,7 +321,7 @@ class _EntriesPageState extends State<EntriesPage> {
           month: day.month,
           selected: day,
           today: budget.now,
-          totals: totals,
+          totals: dailyFlow(file, budget.entries, day.year, day.month),
           onSelect: (d) => setState(() => _day = d),
           onMonth: (step) => setState(() {
             final m = day.month + step;

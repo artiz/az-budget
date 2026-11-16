@@ -1,5 +1,5 @@
-/// Month calendar for the bookings screen: each day shows what was spent on
-/// it; tapping a day selects it (its bookings are listed below the grid by
+/// Month calendar for the bookings screen: each day shows its money flow
+/// (spending as "-424 €", income as "+3 200 €"); tapping a day selects it (its bookings are listed below the grid by
 /// the page). Weeks start on Monday. Only the months of the loaded year
 /// file are reachable, since that file holds the bookings.
 library;
@@ -22,12 +22,27 @@ Map<int, double> dailyExpenses(BudgetFile file, List<BudgetEntry> entries, int y
   return out;
 }
 
-/// A day's total in a calendar cell: whole units, thousands as "12K" from
-/// 10 000 on so it fits a seventh of a phone's width.
+/// Money flow per day of [year]/[month]: income minus spending, so a day
+/// of shopping is negative and payday positive. Transfers between accounts
+/// are left out. (Bookings store spending positive and income negative.)
+Map<int, double> dailyFlow(BudgetFile file, List<BudgetEntry> entries, int year, int month) {
+  final out = <int, double>{};
+  for (final e in entries) {
+    if (e.date.year != year || e.date.month != month) continue;
+    final cat = file.category(e.category);
+    if (cat == null || !(cat.isExpense || cat.isIncome)) continue;
+    out[e.date.day] = (out[e.date.day] ?? 0) - e.amount;
+  }
+  return out;
+}
+
+/// A day's flow in a calendar cell: sign, whole units and the currency,
+/// thousands as "12K" from 10 000 on so it fits a seventh of a phone's width.
 String calendarAmount(double v) {
   final a = v.abs();
   final s = a >= 10000 ? '${(a / 1000).round()}K' : NumberFormat('#,##0', 'de_AT').format(a.round());
-  return v < 0 ? '-$s' : s;
+  final sign = v < 0 ? '-' : (v > 0 ? '+' : '');
+  return '$sign$s $moneySymbol';
 }
 
 class BudgetCalendar extends StatelessWidget {
@@ -38,7 +53,7 @@ class BudgetCalendar extends StatelessWidget {
   final DateTime selected;
   final DateTime today;
 
-  /// Spending per day of the month (see [dailyExpenses]).
+  /// Money flow per day of the month (see [dailyFlow]).
   final Map<int, double> totals;
   final ValueChanged<DateTime> onSelect;
 
@@ -161,7 +176,13 @@ class _DayCell extends StatelessWidget {
                     '$day',
                     style: TextStyle(fontSize: 15, fontWeight: today || selected ? FontWeight.w700 : FontWeight.w500, color: fg),
                   ),
-                  if (total != null && total != 0) Text(calendarAmount(total!), maxLines: 1, style: TextStyle(fontSize: 10, height: 1.1, color: selected ? fg : scheme.onSurfaceVariant)),
+                  if (total != null && total!.abs() >= 0.5)
+                    Text(
+                      calendarAmount(total!),
+                      maxLines: 1,
+                      // Income in the list's income colour.
+                      style: TextStyle(fontSize: 10, height: 1.1, color: selected ? fg : (total! > 0 ? scheme.tertiary : scheme.onSurfaceVariant)),
+                    ),
                 ],
               ),
             ),
