@@ -155,7 +155,21 @@ jobs:
           for p in RECORD_AUDIO WRITE_EXTERNAL_STORAGE READ_EXTERNAL_STORAGE; do
             if grep -q "android.permission.$p\"" "$RUNNER_TEMP/manifest.xml"; then echo "::error::$p is in the bundle's manifest"; exit 1; fi
           done
-          if grep -A2 'android.hardware.camera.any' "$RUNNER_TEMP/manifest.xml" | grep -q 'required="true"'; then echo "::error::the camera must not be a required feature"; exit 1; fi
+          # CAMERA implies a required rear camera with autofocus unless both
+          # are declared optional: Play then drops devices without them.
+          for f in camera.any camera camera.autofocus; do
+            if ! grep -A2 "android:name=\"android.hardware.$f\"" "$RUNNER_TEMP/manifest.xml" | grep -q 'required="false"'; then
+              echo "::error::android.hardware.$f must be declared with required=false"; exit 1
+            fi
+          done
+
+      - name: Native debug symbols
+        run: |
+          # Play asks for them when the bundle has native code (ndk.debugSymbolLevel).
+          if ! unzip -l "$AAB" | grep -q 'BUNDLE-METADATA/com.android.tools.build.debugsymbols/'; then
+            echo "::error::no native debug symbols in the bundle (app/android/app/build.gradle.kts)"; exit 1
+          fi
+          unzip -l "$AAB" | grep 'debugsymbols/' | head -5
 
       - name: Check the signature is the upload key
         if: github.event_name != 'pull_request'

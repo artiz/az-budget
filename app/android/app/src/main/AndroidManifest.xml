@@ -12,7 +12,13 @@
     <!-- The manifest merger adds READ_EXTERNAL_STORAGE as implied by the
          plugin's WRITE_EXTERNAL_STORAGE, even when that one is removed. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- Requesting CAMERA makes Google Play assume a rear camera with
+         autofocus is required unless these are declared: without them about
+         450 devices (fixed-focus or front-camera-only) dropped out. The app
+         works without either (system camera app or gallery; focus is a hint). -->
     <uses-feature android:name="android.hardware.camera.any" android:required="false" tools:replace="android:required"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <application
         android:label="AZ Budget"
         android:name="${applicationName}"

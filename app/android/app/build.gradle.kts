@@ -77,6 +77,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Native symbol tables (OCR library, ONNX Runtime, Flutter engine) go
+            // into the bundle's metadata; Play reads them for native crash and
+            // ANR stacks. The shipped libraries stay as they are.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
 }
