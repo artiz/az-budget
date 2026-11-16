@@ -47,7 +47,7 @@ the device. Your spreadsheet stays where you keep it; delete it yourself if
 you no longer want it.
 
 **Contact.** Questions about this policy: open an issue at
-https://github.com/artiz/az-receipts-parser.
+https://github.com/artiz/az-budget.
 
 ## Deutsch
 
@@ -94,4 +94,4 @@ Einstellungen kann stattdessen die Kamera-App des Telefons gewählt werden.
 Gerät gespeichert hat. Deine Tabelle bleibt, wo du sie aufbewahrst.
 
 **Kontakt.** Fragen zu dieser Erklärung über ein Issue unter
-https://github.com/artiz/az-receipts-parser.
+https://github.com/artiz/az-budget.
