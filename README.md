@@ -4,6 +4,9 @@
 
 No account, no server, no ads.
 
+**iOS:** there is no official iOS version. Apple banned my developer account
+because of my Belarusian citizenship, so I cannot publish on the App Store.
+
 Android app (Flutter) for a household budget that lives in one spreadsheet per
 year, `Budget <year>.xlsx`, in a cloud folder (Google Drive, Dropbox, iCloud or
 local storage). The app appends bookings to that file; the spreadsheet keeps
@@ -412,7 +415,10 @@ Dart tests to see what moved before committing the new fixtures.
 
 ## Known limits
 
-* Android only (the folder bridge is Storage Access Framework). iCloud Drive
+* Android only: no official iOS version (Apple banned the developer account
+  over Belarusian citizenship, see the top). The code is Flutter, but the
+  folder bridge (Storage Access Framework) and the OCR library build are
+  Android-only. iCloud Drive
   works through Apple's Android client only where that exists; Dropbox and
   Google Drive expose their folders through their Android apps.
 * Edits of bookings already in the file are done in the spreadsheet, not in
