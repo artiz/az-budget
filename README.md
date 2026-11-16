@@ -1,4 +1,4 @@
-# AZ Budget (az-receipts-parser)
+# AZ Budget
 
 Android app (Flutter) for a household budget that lives in one spreadsheet per
 year, `Budget <year>.xlsx`, in a cloud folder (Google Drive, Dropbox, iCloud or

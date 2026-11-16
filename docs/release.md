@@ -52,7 +52,7 @@ targets; the App bundle explorer in the console flags it otherwise.
 
 All under **Set up your app** on the dashboard:
 
-- **Privacy policy**: `https://github.com/artiz/az-receipts-parser/blob/master/docs/privacy.md`
+- **Privacy policy**: `https://github.com/artiz/az-budget/blob/master/docs/privacy.md`
   (or a GitHub Pages copy).
 - **App access**: all functionality available without special access; add a
   note for reviewers: no account, pick any folder when asked (an empty one

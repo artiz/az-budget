@@ -3,7 +3,7 @@ name = "receipt_ocr"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.92"
-description = "Receipt OCR for az-receipts-parser: docling.rs text detection + recognition behind a tiny C ABI (dart:ffi) and a host CLI."
+description = "Receipt OCR for AZ Budget: docling.rs text detection + recognition behind a tiny C ABI (dart:ffi) and a host CLI."
 license = "MIT"
 publish = false
 
