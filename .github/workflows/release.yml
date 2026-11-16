@@ -131,7 +131,13 @@ jobs:
 
       - name: App Bundle
         working-directory: app
-        run: flutter build appbundle --release --build-number=${{ steps.version.outputs.code }} --build-name=${{ steps.version.outputs.name }}
+        run: |
+          # Gradle uses the runner's NDK (as the Rust step does) instead of
+          # downloading the one Flutter defaults to (app/build.gradle.kts).
+          ndk=$(sed -n 's/^Pkg.Revision *= *//p' "$ANDROID_NDK_LATEST_HOME/source.properties")
+          echo "NDK $ndk"
+          export ORG_GRADLE_PROJECT_azNdkVersion="$ndk"
+          flutter build appbundle --release --build-number=${{ steps.version.outputs.code }} --build-name=${{ steps.version.outputs.name }}
 
       - name: Obfuscation
         run: |

@@ -61,6 +61,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get entryIncomplete => 'Bitte Kategorie wählen und Betrag eingeben.';
 
   @override
+  String get categoryRequired => 'Kategorie wählen';
+
+  @override
+  String get amountRequired => 'Betrag eingeben';
+
+  @override
+  String get amountInvalid => 'Kein gültiger Betrag';
+
+  @override
   String get category => 'Kategorie';
 
   @override
@@ -120,6 +129,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noEntries => 'Noch keine Buchungen.';
+
+  @override
+  String get calendarView => 'Kalender';
+
+  @override
+  String get listView => 'Liste';
+
+  @override
+  String monthToDate(String date) {
+    return 'Monat bis $date';
+  }
+
+  @override
+  String get saldoShort => 'Saldo';
+
+  @override
+  String get noEntriesDay => 'Keine Buchungen an diesem Tag.';
 
   @override
   String get noFileLoaded => 'Keine Budget-Datei geladen.';

@@ -61,6 +61,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get entryIncomplete => 'Выбери категорию и введи сумму.';
 
   @override
+  String get categoryRequired => 'Выберите категорию';
+
+  @override
+  String get amountRequired => 'Введите сумму';
+
+  @override
+  String get amountInvalid => 'Это не сумма';
+
+  @override
   String get category => 'Категория';
 
   @override
@@ -118,6 +127,23 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noEntries => 'Записей пока нет.';
+
+  @override
+  String get calendarView => 'Календарь';
+
+  @override
+  String get listView => 'Список';
+
+  @override
+  String monthToDate(String date) {
+    return 'Месяц до $date';
+  }
+
+  @override
+  String get saldoShort => 'Сальдо';
+
+  @override
+  String get noEntriesDay => 'В этот день записей нет.';
 
   @override
   String get noFileLoaded => 'Файл бюджета не загружен.';

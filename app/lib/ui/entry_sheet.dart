@@ -31,7 +31,14 @@ class EntryDraft {
 /// Shows the form; returns the entry when saved, null when dismissed.
 /// [onSplit] (receipt scans) enables "split": the entries, one per
 /// category, are handed to it and the sheet closes with null.
-Future<BudgetEntry?> showEntrySheet(BuildContext context, {required BudgetService budget, EntryDraft? draft, String? title, Future<void> Function()? onDelete, Future<void> Function(List<BudgetEntry>)? onSplit}) {
+Future<BudgetEntry?> showEntrySheet(
+  BuildContext context, {
+  required BudgetService budget,
+  EntryDraft? draft,
+  String? title,
+  Future<void> Function()? onDelete,
+  Future<void> Function(List<BudgetEntry>)? onSplit,
+}) {
   // Refresh in the background while the user fills the form, so the
   // duplicate check on save sees what was added on the laptop meanwhile.
   unawaited(budget.sync());
@@ -80,6 +87,9 @@ class _EntryFormState extends State<EntryForm> {
   String? _category;
   final _amountFocus = FocusNode();
   final _descFocus = FocusNode();
+
+  /// Save was pressed with a field missing: the fields say which.
+  bool _tried = false;
 
   @override
   void initState() {
@@ -141,7 +151,11 @@ class _EntryFormState extends State<EntryForm> {
         content: Text(l.deleteEntryBody('${_description.text.trim()} · ${_amount.text.trim()} €')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
-          FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error), onPressed: () => Navigator.pop(ctx, true), child: Text(l.delete)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.delete),
+          ),
         ],
       ),
     );
@@ -154,13 +168,16 @@ class _EntryFormState extends State<EntryForm> {
     final cat = _cat;
     final amount = parseAmount(_amount.text);
     if (cat == null || amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).entryIncomplete)));
+      setState(() => _tried = true); // the fields say what is missing
+      if (cat != null) _amountFocus.requestFocus();
       return;
     }
-    final entries = await Navigator.of(context).push<List<BudgetEntry>>(MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (_) => SplitReceiptPage(date: _date, description: _description.text.trim(), total: amount.abs(), items: widget.draft.items, main: cat.name),
-    ));
+    final entries = await Navigator.of(context).push<List<BudgetEntry>>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => SplitReceiptPage(date: _date, description: _description.text.trim(), total: amount.abs(), items: widget.draft.items, main: cat.name),
+      ),
+    );
     if (entries == null || !mounted) return;
     Navigator.of(context).pop();
     await widget.onSplit!(entries);
@@ -172,24 +189,20 @@ class _EntryFormState extends State<EntryForm> {
   }
 
   void _save() {
-    final l = AppLocalizations.of(context);
     final amount = parseAmount(_amount.text);
     final cat = _cat;
     if (cat == null || amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.entryIncomplete)));
+      // Said at the field that is missing (a message at the bottom of the
+      // screen sits behind the form), and the cursor goes there.
+      setState(() => _tried = true);
+      if (cat != null) _amountFocus.requestFocus();
       return;
     }
     // The file stores income negative; the user types a plain number.
     var signed = amount.abs();
     if (cat.isIncome) signed = -signed;
     if (amount < 0 && !cat.isIncome) signed = -amount.abs(); // explicit refund on an expense category
-    Navigator.of(context).pop(BudgetEntry(
-      date: _date,
-      category: cat.name,
-      description: _description.text.trim(),
-      amount: signed,
-      note: _note.text.trim(),
-    ));
+    Navigator.of(context).pop(BudgetEntry(date: _date, category: cat.name, description: _description.text.trim(), amount: signed, note: _note.text.trim()));
   }
 
   @override
@@ -215,7 +228,9 @@ class _EntryFormState extends State<EntryForm> {
         children: [
           Row(
             children: [
-              Expanded(child: Text(widget.title ?? l.newEntry, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700))),
+              Expanded(
+                child: Text(widget.title ?? l.newEntry, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+              ),
               TextButton.icon(onPressed: _pickDate, icon: const Icon(Icons.event_outlined, size: 18), label: Text(dateDmy(_date))),
             ],
           ),
@@ -225,12 +240,18 @@ class _EntryFormState extends State<EntryForm> {
             key: ValueKey(_category),
             initialValue: cats.any((c) => c.name == _category) ? _category : null,
             isExpanded: true,
-            decoration: InputDecoration(labelText: l.category),
+            decoration: InputDecoration(labelText: l.category, errorText: _tried && _cat == null ? l.categoryRequired : null),
             items: [
               for (final c in cats)
                 DropdownMenuItem(
                   value: c.name,
-                  child: Row(children: [CategoryDot(name: c.name), const SizedBox(width: 10), Expanded(child: Text(c.name, overflow: TextOverflow.ellipsis))]),
+                  child: Row(
+                    children: [
+                      CategoryDot(name: c.name),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text(c.name, overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
                 ),
             ],
             onChanged: (v) => setState(() => _category = v),
@@ -249,13 +270,7 @@ class _EntryFormState extends State<EntryForm> {
                     child: Wrap(
                       spacing: 6,
                       runSpacing: 6,
-                      children: [
-                        for (final s in top)
-                          ActionChip(
-                            label: Text('${s.description} · ${euroShort(s.lastAmount)}'),
-                            onPressed: () => _pickSuggestion(s.description, s.lastAmount),
-                          ),
-                      ],
+                      children: [for (final s in top) ActionChip(label: Text('${s.description} · ${euroShort(s.lastAmount)}'), onPressed: () => _pickSuggestion(s.description, s.lastAmount))],
                     ),
                   ),
           ),
@@ -264,7 +279,10 @@ class _EntryFormState extends State<EntryForm> {
             controller: _description,
             focusNode: _descFocus,
             textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(labelText: l.description, suffixIcon: _description.text.isEmpty ? null : IconButton(icon: const Icon(Icons.clear), onPressed: () => _description.clear())),
+            decoration: InputDecoration(
+              labelText: l.description,
+              suffixIcon: _description.text.isEmpty ? null : IconButton(icon: const Icon(Icons.clear), onPressed: () => _description.clear()),
+            ),
             textInputAction: TextInputAction.next,
             onSubmitted: (_) => _amountFocus.requestFocus(),
           ),
@@ -273,30 +291,39 @@ class _EntryFormState extends State<EntryForm> {
             child: !_descFocus.hasFocus || suggestions.isEmpty
                 ? const SizedBox.shrink()
                 : Padding(
-              padding: const EdgeInsets.only(top: 4),
-              // A Material, not a decorated box: the rows paint their tap ripple on it.
-              child: Material(
-                color: scheme.surfaceContainerHighest,
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: scheme.outline)),
-                child: Column(
-                  children: [
-                    for (final s in suggestions)
-                      ListTile(
-                        dense: true,
-                        visualDensity: VisualDensity.compact,
-                        title: Text(s.description, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        // Matches from another category say which one picking them switches to.
-                        subtitle: s.category == _category
-                            ? null
-                            : Row(children: [CategoryDot(name: s.category), const SizedBox(width: 6), Expanded(child: Text(s.category, maxLines: 1, overflow: TextOverflow.ellipsis))]),
-                        trailing: Text(euroShort(s.lastAmount), style: TextStyle(color: scheme.onSurfaceVariant)),
-                        onTap: () => _pickSuggestion(s.description, s.lastAmount, category: s.category),
+                    padding: const EdgeInsets.only(top: 4),
+                    // A Material, not a decorated box: the rows paint their tap ripple on it.
+                    child: Material(
+                      color: scheme.surfaceContainerHighest,
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: scheme.outline),
                       ),
-                  ],
-                ),
-              ),
-            ),
+                      child: Column(
+                        children: [
+                          for (final s in suggestions)
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity.compact,
+                              title: Text(s.description, maxLines: 1, overflow: TextOverflow.ellipsis),
+                              // Matches from another category say which one picking them switches to.
+                              subtitle: s.category == _category
+                                  ? null
+                                  : Row(
+                                      children: [
+                                        CategoryDot(name: s.category),
+                                        const SizedBox(width: 6),
+                                        Expanded(child: Text(s.category, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                      ],
+                                    ),
+                              trailing: Text(euroShort(s.lastAmount), style: TextStyle(color: scheme.onSurfaceVariant)),
+                              onTap: () => _pickSuggestion(s.description, s.lastAmount, category: s.category),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -309,7 +336,11 @@ class _EntryFormState extends State<EntryForm> {
               labelText: l.amount,
               suffixText: '€',
               helperText: _cat?.isIncome ?? false ? l.amountIncomeHint : l.formulaHint,
+              errorText: !_tried || parseAmount(_amount.text) != null ? null : (_amount.text.trim().isEmpty ? l.amountRequired : l.amountInvalid),
             ),
+            onChanged: (_) {
+              if (_tried) setState(() {}); // the error goes as soon as the amount is valid
+            },
             onSubmitted: (_) => _save(),
           ),
           const SizedBox(height: 12),

@@ -190,6 +190,24 @@ abstract class AppLocalizations {
   /// **'Please choose a category and enter an amount.'**
   String get entryIncomplete;
 
+  /// No description provided for @categoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category'**
+  String get categoryRequired;
+
+  /// No description provided for @amountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount'**
+  String get amountRequired;
+
+  /// No description provided for @amountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not an amount'**
+  String get amountInvalid;
+
   /// No description provided for @category.
   ///
   /// In en, this message translates to:
@@ -297,6 +315,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No entries yet.'**
   String get noEntries;
+
+  /// No description provided for @calendarView.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarView;
+
+  /// No description provided for @listView.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get listView;
+
+  /// No description provided for @monthToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Month up to {date}'**
+  String monthToDate(String date);
+
+  /// No description provided for @saldoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get saldoShort;
+
+  /// No description provided for @noEntriesDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries on this day.'**
+  String get noEntriesDay;
 
   /// No description provided for @noFileLoaded.
   ///

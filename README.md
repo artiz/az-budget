@@ -1,5 +1,12 @@
 # AZ Budget
 
+[Get it on Google Play](https://play.google.com/store/apps/details?id=dev.artiz.az_budget&hl=en)
+
+No account, no server, no ads.
+
+**iOS:** there is no official iOS version. Apple banned my developer account
+because of my Belarusian citizenship, so I cannot publish on the App Store.
+
 Android app (Flutter) for a household budget that lives in one spreadsheet per
 year, `Budget <year>.xlsx`, in a cloud folder (Google Drive, Dropbox, iCloud or
 local storage). The app appends bookings to that file; the spreadsheet keeps
@@ -86,7 +93,14 @@ the bookings in the file.
    confirm or change the amount; long-press a tile, or long-press or swipe
    right on a table row, to pin that category + description to the front of
    the tiles, again to unpin; pins are kept on the device), the lower half the bookings table with a
-   search field, paged by 20 as you scroll. Tap a row to edit it (queued rows
+   search field, paged by 20 as you scroll. The calendar button next to the
+   quick tiles switches to a **month calendar** (remembered): each day shows
+   its money flow with sign and currency (spending "-424 €", payday
+   "+3 200 €" in green; transfers left out), below it Einnahmen, Ausgaben
+   and Saldo of the day and of the month so far (the overview's sums and
+   colours), then the
+   selected day's bookings; swipe or the arrows change the month within the
+   loaded year, and *+ Entry* books on the selected day. Tap a row to edit it (queued rows
    and rows already in the file alike, the file row is rewritten in place);
    the **+** on a row tops it up ("+6 Glühwein": amount added, detail appended
    to the note). *New entry* has category, description autocomplete, amount,
@@ -404,7 +418,10 @@ Dart tests to see what moved before committing the new fixtures.
 
 ## Known limits
 
-* Android only (the folder bridge is Storage Access Framework). iCloud Drive
+* Android only: no official iOS version (Apple banned the developer account
+  over Belarusian citizenship, see the top). The code is Flutter, but the
+  folder bridge (Storage Access Framework) and the OCR library build are
+  Android-only. iCloud Drive
   works through Apple's Android client only where that exists; Dropbox and
   Google Drive expose their folders through their Android apps.
 * Edits of bookings already in the file are done in the spreadsheet, not in

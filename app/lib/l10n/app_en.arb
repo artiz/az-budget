@@ -36,6 +36,9 @@
     }
   },
   "entryIncomplete": "Please choose a category and enter an amount.",
+  "categoryRequired": "Choose a category",
+  "amountRequired": "Enter the amount",
+  "amountInvalid": "Not an amount",
   "category": "Category",
   "description": "Description",
   "amount": "Amount",
@@ -68,6 +71,18 @@
     }
   },
   "noEntries": "No entries yet.",
+  "calendarView": "Calendar",
+  "listView": "List",
+  "monthToDate": "Month up to {date}",
+  "@monthToDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "saldoShort": "Balance",
+  "noEntriesDay": "No entries on this day.",
   "noFileLoaded": "No budget file loaded.",
   "income": "Income",
   "expenses": "Expenses",

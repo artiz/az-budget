@@ -215,6 +215,9 @@ class BudgetService extends ChangeNotifier {
 
   int get currentYear => _clock().year;
 
+  /// The service's clock (tests set it), for "today" in the UI.
+  DateTime get now => _clock();
+
   /// An existing entry that looks like [entry] (same category and amount,
   /// date within [days]): what a scanned receipt of an already typed
   /// purchase produces.

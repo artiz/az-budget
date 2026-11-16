@@ -131,8 +131,7 @@ String hexOfColor(Color c) => '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).pa
 
 /// The colour of a category as the file's settings say, falling back to one
 /// derived from the name.
-Color categoryColorOf(BuildContext context, String name) =>
-    categoryColor(name, Theme.of(context).brightness, hex: AppScope.of(context).budget.file?.category(name)?.color);
+Color categoryColorOf(BuildContext context, String name) => categoryColor(name, Theme.of(context).brightness, hex: AppScope.of(context).budget.file?.category(name)?.color);
 
 /// A stable accent per category: the [hex] chosen in the file, else derived
 /// from the name so new categories get a colour without any code change.
@@ -248,48 +247,59 @@ class EntryTile extends StatelessWidget {
         color: zebra ? scheme.surfaceContainerLow : null,
         border: dayStart ? Border(top: BorderSide(color: scheme.outline, width: 2)) : null,
       ),
-      child: ListTile(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      dense: true,
-      leading: SizedBox(
-        width: 44,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(dateDm(entry.date), style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 2),
-            Icon(categoryIcon(cat, entry.category), size: 16, color: color),
-          ],
-        ),
-      ),
-      title: Text(
-        entry.description.isEmpty ? entry.category : entry.description,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontWeight: FontWeight.w500, fontStyle: isTransfer ? FontStyle.italic : null, color: isTransfer ? scheme.onSurfaceVariant : null),
-      ),
-      subtitle: Text(
-        [entry.category, if (entry.note.isNotEmpty) oneLine(entry.note)].join(' · '),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (entry.isPending)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Icon(Icons.cloud_upload_outlined, size: 16, color: scheme.onSurfaceVariant),
+      // Its own (transparent) Material: the row's shading would hide the ink otherwise.
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          dense: true,
+          leading: SizedBox(
+            width: 44,
+            // Shrinks instead of overflowing with a large system font size.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    dateDm(entry.date),
+                    style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 2),
+                  Icon(categoryIcon(cat, entry.category), size: 16, color: color),
+                ],
+              ),
             ),
-          Text(
-            euro(entry.amount),
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: amountColor(context, entry, budget), fontFeatures: const [FontFeature.tabularFigures()]),
           ),
-          ?trailing,
-        ],
-      ),
+          title: Text(
+            entry.description.isEmpty ? entry.category : entry.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.w500, fontStyle: isTransfer ? FontStyle.italic : null, color: isTransfer ? scheme.onSurfaceVariant : null),
+          ),
+          subtitle: Text(
+            [entry.category, if (entry.note.isNotEmpty) oneLine(entry.note)].join(' · '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (entry.isPending)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Icon(Icons.cloud_upload_outlined, size: 16, color: scheme.onSurfaceVariant),
+                ),
+              Text(
+                euro(entry.amount),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: amountColor(context, entry, budget), fontFeatures: const [FontFeature.tabularFigures()]),
+              ),
+              ?trailing,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -321,8 +331,11 @@ class SyncStatusBar extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
           child: Row(
             children: [
-              ?leading,
-              const Spacer(),
+              // The left side takes what is left and may shrink (the quick
+              // tiles' label ellipsizes on a narrow phone).
+              Expanded(
+                child: Align(alignment: Alignment.centerLeft, child: leading ?? const SizedBox.shrink()),
+              ),
               if (budget.pending.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(right: 6),
@@ -363,7 +376,9 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
       child: Row(
         children: [
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.2))),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.2)),
+          ),
           ?trailing,
         ],
       ),
@@ -388,7 +403,11 @@ class EmptyHint extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: scheme.onSurfaceVariant),
             const SizedBox(height: 12),
-            Text(text, textAlign: TextAlign.center, style: TextStyle(color: scheme.onSurfaceVariant)),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
             if (action case final a?) ...[const SizedBox(height: 16), a],
           ],
         ),
@@ -409,12 +428,7 @@ class DialogTitle extends StatelessWidget {
       children: [
         Expanded(child: child),
         const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.close),
-          visualDensity: VisualDensity.compact,
-          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        IconButton(icon: const Icon(Icons.close), visualDensity: VisualDensity.compact, tooltip: MaterialLocalizations.of(context).closeButtonTooltip, onPressed: () => Navigator.of(context).pop()),
       ],
     );
   }
