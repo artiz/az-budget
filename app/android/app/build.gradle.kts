@@ -19,7 +19,11 @@ val hasUploadKey = keystoreProperties.getProperty("storeFile") != null
 android {
     namespace = "dev.artiz.az_budget"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // The NDK only strips the native libraries and extracts their symbols.
+    // CI sets azNdkVersion to the NDK its runner already has (the one the
+    // Rust library is built with), so the build does not download another
+    // (~700 MB, and a broken download failed a build); locally Flutter's default.
+    ndkVersion = providers.gradleProperty("azNdkVersion").orNull ?: flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
