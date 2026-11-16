@@ -72,29 +72,43 @@ void main() {
     expect(find.text('März 2026'), findsOneWidget);
     expect(day.value, DateTime(2026, 3, 1));
 
-    final totals = dailyExpenses(file, budget.entries, 2026, 3);
-    expect(totals, isNotEmpty);
-    final busiest = totals.entries.reduce((a, b) => a.value >= b.value ? a : b);
     final flows = dailyFlow(file, budget.entries, 2026, 3);
-    final cell = find.byKey(ValueKey('calendar-day-${busiest.key}'));
-    expect(flows[busiest.key], lessThan(0), reason: 'a day of spending is negative');
-    expect(find.descendant(of: cell, matching: find.text(calendarAmount(flows[busiest.key]!))), findsOneWidget);
-    expect(calendarAmount(flows[busiest.key]!), startsWith('-'));
+    expect(flows, isNotEmpty);
+    final busiest = flows.entries.reduce((a, b) => a.value <= b.value ? a : b).key;
+    final cell = find.byKey(ValueKey('calendar-day-$busiest'));
+    expect(flows[busiest], lessThan(0), reason: 'a day of spending is negative');
+    expect(find.descendant(of: cell, matching: find.text(calendarAmount(flows[busiest]!))), findsOneWidget);
+    expect(calendarAmount(flows[busiest]!), startsWith('-'));
     // Payday: the salary shows as a positive flow.
     final payday = budget.entries.firstWhere((e) => e.date.month == 3 && (file.category(e.category)?.isIncome ?? false));
     expect(flows[payday.date.day], greaterThan(0));
     expect(find.descendant(of: find.byKey(ValueKey('calendar-day-${payday.date.day}')), matching: find.text(calendarAmount(flows[payday.date.day]!))), findsOneWidget);
     await tester.tap(cell);
     await tester.pumpAndSettle();
-    expect(day.value, DateTime(2026, 3, busiest.key));
-    final booked = budget.entries.where((e) => e.date.month == 3 && e.date.day == busiest.key).length;
+    expect(day.value, DateTime(2026, 3, busiest));
+    final booked = budget.entries.where((e) => e.date.month == 3 && e.date.day == busiest).length;
     expect(find.byType(EntryTile), findsNWidgets(booked));
-    // Summary: that day, and the month up to it.
-    final toDate = totals.entries.where((t) => t.key <= busiest.key).fold(0.0, (s, t) => s + t.value);
-    expect(find.text(euro(busiest.value)), findsWidgets);
-    expect(find.text(euro(toDate)), findsWidgets);
-    // The same spending as the month's expenses elsewhere (no income, no transfers).
-    expect(totals.values.fold(0.0, (s, v) => s + v), closeTo(budget.monthExpenses(3), 0.001));
+
+    // Summary: Einnahmen, Ausgaben, Saldo of the day and of the month so far.
+    final summary = find.byKey(const ValueKey('calendar-summary'));
+    for (final h in ['Einnahmen', 'Ausgaben', 'Saldo']) {
+      expect(find.descendant(of: summary, matching: find.text(h)), findsOneWidget);
+    }
+    final march = budget.entries.where((e) => e.date.year == 2026 && e.date.month == 3);
+    final dayT = BookingTotals.of(file, march.where((e) => e.date.day == busiest));
+    final soFar = BookingTotals.of(file, march.where((e) => e.date.day <= busiest));
+    for (final v in [euro(dayT.income), euro(dayT.expenses), euro(dayT.saldo, showPlus: true), euro(soFar.income), euro(soFar.expenses), euro(soFar.saldo, showPlus: true)]) {
+      expect(
+        find.descendant(of: summary, matching: find.text(v)),
+        findsWidgets,
+        reason: v,
+      );
+    }
+    // The whole month: the same numbers as the overview (expenses as in the
+    // limit check), and the day cells add up to the Saldo.
+    final all = BookingTotals.of(file, march);
+    expect(all.expenses, closeTo(budget.monthExpenses(3), 0.001));
+    expect(flows.values.fold(0.0, (s, v) => s + v), closeTo(all.saldo, 0.001));
 
     // Swipe right: February.
     await tester.fling(find.byType(BudgetCalendar), const Offset(300, 0), 1000);

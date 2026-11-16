@@ -96,8 +96,9 @@ the bookings in the file.
    search field, paged by 20 as you scroll. The calendar button next to the
    quick tiles switches to a **month calendar** (remembered): each day shows
    its money flow with sign and currency (spending "-424 €", payday
-   "+3 200 €" in green; transfers left out), below it the day's and the
-   month's spending so far, then the
+   "+3 200 €" in green; transfers left out), below it Einnahmen, Ausgaben
+   and Saldo of the day and of the month so far (the overview's sums and
+   colours), then the
    selected day's bookings; swipe or the arrows change the month within the
    loaded year, and *+ Entry* books on the selected day. Tap a row to edit it (queued rows
    and rows already in the file alike, the file row is rewritten in place);

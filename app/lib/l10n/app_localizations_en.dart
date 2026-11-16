@@ -137,14 +137,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listView => 'List';
 
   @override
-  String dayExpenses(String date) {
-    return 'Spent on $date';
-  }
-
-  @override
   String monthToDate(String date) {
     return 'Month up to $date';
   }
+
+  @override
+  String get saldoShort => 'Balance';
 
   @override
   String get noEntriesDay => 'No entries on this day.';

@@ -135,14 +135,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get listView => 'Список';
 
   @override
-  String dayExpenses(String date) {
-    return 'Расходы $date';
-  }
-
-  @override
   String monthToDate(String date) {
     return 'Месяц до $date';
   }
+
+  @override
+  String get saldoShort => 'Сальдо';
 
   @override
   String get noEntriesDay => 'В этот день записей нет.';

@@ -73,14 +73,6 @@
   "noEntries": "No entries yet.",
   "calendarView": "Calendar",
   "listView": "List",
-  "dayExpenses": "Spent on {date}",
-  "@dayExpenses": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "monthToDate": "Month up to {date}",
   "@monthToDate": {
     "placeholders": {
@@ -89,6 +81,7 @@
       }
     }
   },
+  "saldoShort": "Balance",
   "noEntriesDay": "No entries on this day.",
   "noFileLoaded": "No budget file loaded.",
   "income": "Income",

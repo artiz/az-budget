@@ -8,18 +8,32 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../budget/budget_file.dart';
+import '../l10n/app_localizations.dart';
 import 'widgets.dart';
 
-/// Spending per day of [year]/[month]: expense bookings only (not income,
-/// not transfers), keyed by day of the month.
-Map<int, double> dailyExpenses(BudgetFile file, List<BudgetEntry> entries, int year, int month) {
-  final out = <int, double>{};
-  for (final e in entries) {
-    if (e.date.year != year || e.date.month != month) continue;
-    if (!(file.category(e.category)?.isExpense ?? false)) continue;
-    out[e.date.day] = (out[e.date.day] ?? 0) + e.amount;
+/// Income and spending of some bookings, counted as the overview counts a
+/// month: income categories (stored negative) and expense categories;
+/// transfers and unknown categories are left out.
+class BookingTotals {
+  const BookingTotals(this.income, this.expenses);
+  final double income;
+  final double expenses;
+  double get saldo => income - expenses;
+
+  static BookingTotals of(BudgetFile file, Iterable<BudgetEntry> entries) {
+    var income = 0.0;
+    var expenses = 0.0;
+    for (final e in entries) {
+      final cat = file.category(e.category);
+      if (cat == null) continue;
+      if (cat.isIncome) {
+        income += -e.amount;
+      } else if (cat.isExpense) {
+        expenses += e.amount;
+      }
+    }
+    return BookingTotals(income, expenses);
   }
-  return out;
 }
 
 /// Money flow per day of [year]/[month]: income minus spending, so a day
@@ -193,30 +207,64 @@ class _DayCell extends StatelessWidget {
   }
 }
 
-/// Spending on the selected day and in its month up to that day.
+/// Einnahmen, Ausgaben and Saldo of the selected day and of its month up to
+/// that day, as on the overview (same sums, same colours).
 class CalendarSummary extends StatelessWidget {
-  const CalendarSummary({super.key, required this.dayLabel, required this.dayAmount, required this.monthLabel, required this.monthAmount});
+  const CalendarSummary({super.key, required this.dayLabel, required this.day, required this.monthLabel, required this.month, this.monthExpensesColor});
   final String dayLabel;
-  final double dayAmount;
+  final BookingTotals day;
   final String monthLabel;
-  final double monthAmount;
+  final BookingTotals month;
+
+  /// The month's spending in its limit colour, as on the overview.
+  final Color? monthExpensesColor;
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    Widget cell(String label, double v, CrossAxisAlignment align) => Expanded(
-      child: Column(
-        crossAxisAlignment: align,
-        children: [
-          Text(label, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-          Text(euro(v), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-        ],
+    Widget fit(Widget child, {Alignment align = Alignment.centerRight}) => FittedBox(fit: BoxFit.scaleDown, alignment: align, child: child);
+    Widget head(String text) => Padding(
+      padding: const EdgeInsets.only(left: 10, bottom: 2),
+      child: fit(Text(text, style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant))),
+    );
+    // A gap to the left keeps the right-aligned amounts apart.
+    Widget value(String text, Color? color, {bool bold = false}) => Padding(
+      padding: const EdgeInsets.only(left: 10, top: 1, bottom: 1),
+      child: fit(
+        Text(
+          text,
+          style: TextStyle(fontSize: 13, fontWeight: bold ? FontWeight.w700 : FontWeight.w500, color: color, fontFeatures: const [FontFeature.tabularFigures()]),
+        ),
       ),
+    );
+    TableRow row(String label, BookingTotals t, {Color? expensesColor, bool bold = false}) => TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 1),
+          child: fit(
+            Text(label, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+            align: Alignment.centerLeft,
+          ),
+        ),
+        value(euro(t.income), scheme.tertiary, bold: bold),
+        value(euro(t.expenses), expensesColor, bold: bold),
+        value(euro(t.saldo, showPlus: true), t.saldo >= 0 ? scheme.tertiary : scheme.primary, bold: bold),
+      ],
     );
     return Container(
       color: scheme.surfaceContainerHigh,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(children: [cell(dayLabel, dayAmount, CrossAxisAlignment.start), cell(monthLabel, monthAmount, CrossAxisAlignment.end)]),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+      child: Table(
+        key: const ValueKey('calendar-summary'),
+        columnWidths: const {0: FlexColumnWidth(1.15), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1), 3: FlexColumnWidth(1.1)},
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          TableRow(children: [const SizedBox.shrink(), head(l.income), head(l.expenses), head(l.saldoShort)]),
+          row(dayLabel, day),
+          row(monthLabel, month, expensesColor: monthExpensesColor, bold: true),
+        ],
+      ),
     );
   }
 }

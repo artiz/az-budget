@@ -12,6 +12,7 @@ import '../budget/budget_service.dart';
 import '../budget/entry_suggest.dart';
 import '../core/text_normalize.dart';
 import '../l10n/app_localizations.dart';
+import '../theme.dart';
 import 'calendar_view.dart';
 import 'entry_actions.dart';
 import 'entry_sheet.dart';
@@ -308,8 +309,6 @@ class _EntriesPageState extends State<EntriesPage> {
   Widget _calendarBody(BuildContext context, BudgetService budget, DateTime day) {
     final l = AppLocalizations.of(context);
     final file = budget.file!;
-    final totals = dailyExpenses(file, budget.entries, day.year, day.month);
-    final monthToDate = totals.entries.where((t) => t.key <= day.day).fold(0.0, (s, t) => s + t.value);
     final rows = [
       for (final e in budget.entries)
         if (_sameDay(e.date, day)) e,
@@ -330,7 +329,18 @@ class _EntriesPageState extends State<EntriesPage> {
             _day = now.year == day.year && now.month == m ? DateTime(now.year, now.month, now.day) : DateTime(day.year, m);
           }),
         ),
-        CalendarSummary(dayLabel: l.dayExpenses(dateDm(day)), dayAmount: totals[day.day] ?? 0, monthLabel: l.monthToDate(dateDm(day)), monthAmount: monthToDate),
+        Builder(
+          builder: (context) {
+            final monthSoFar = BookingTotals.of(file, budget.entries.where((e) => e.date.year == day.year && e.date.month == day.month && e.date.day <= day.day));
+            return CalendarSummary(
+              dayLabel: dateDm(day),
+              day: BookingTotals.of(file, rows),
+              monthLabel: l.monthToDate(dateDm(day)),
+              month: monthSoFar,
+              monthExpensesColor: limitColor(context, budget.limitLevel(monthSoFar.expenses)),
+            );
+          },
+        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: budget.sync,
