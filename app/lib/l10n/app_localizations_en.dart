@@ -122,6 +122,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEntries => 'No entries yet.';
 
   @override
+  String get calendarView => 'Calendar';
+
+  @override
+  String get listView => 'List';
+
+  @override
+  String dayExpenses(String date) {
+    return 'Spent on $date';
+  }
+
+  @override
+  String monthToDate(String date) {
+    return 'Month up to $date';
+  }
+
+  @override
+  String get noEntriesDay => 'No entries on this day.';
+
+  @override
   String get noFileLoaded => 'No budget file loaded.';
 
   @override

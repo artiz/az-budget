@@ -122,6 +122,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noEntries => 'Noch keine Buchungen.';
 
   @override
+  String get calendarView => 'Kalender';
+
+  @override
+  String get listView => 'Liste';
+
+  @override
+  String dayExpenses(String date) {
+    return 'Ausgaben am $date';
+  }
+
+  @override
+  String monthToDate(String date) {
+    return 'Monat bis $date';
+  }
+
+  @override
+  String get noEntriesDay => 'Keine Buchungen an diesem Tag.';
+
+  @override
   String get noFileLoaded => 'Keine Budget-Datei geladen.';
 
   @override

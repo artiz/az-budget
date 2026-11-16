@@ -298,6 +298,36 @@ abstract class AppLocalizations {
   /// **'No entries yet.'**
   String get noEntries;
 
+  /// No description provided for @calendarView.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarView;
+
+  /// No description provided for @listView.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get listView;
+
+  /// No description provided for @dayExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on {date}'**
+  String dayExpenses(String date);
+
+  /// No description provided for @monthToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Month up to {date}'**
+  String monthToDate(String date);
+
+  /// No description provided for @noEntriesDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries on this day.'**
+  String get noEntriesDay;
+
   /// No description provided for @noFileLoaded.
   ///
   /// In en, this message translates to:

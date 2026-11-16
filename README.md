@@ -1,5 +1,9 @@
 # AZ Budget
 
+[Get it on Google Play](https://play.google.com/store/apps/details?id=dev.artiz.az_budget&hl=en)
+
+No account, no server, no ads.
+
 Android app (Flutter) for a household budget that lives in one spreadsheet per
 year, `Budget <year>.xlsx`, in a cloud folder (Google Drive, Dropbox, iCloud or
 local storage). The app appends bookings to that file; the spreadsheet keeps
@@ -86,7 +90,11 @@ the bookings in the file.
    confirm or change the amount; long-press a tile, or long-press or swipe
    right on a table row, to pin that category + description to the front of
    the tiles, again to unpin; pins are kept on the device), the lower half the bookings table with a
-   search field, paged by 20 as you scroll. Tap a row to edit it (queued rows
+   search field, paged by 20 as you scroll. The calendar button next to the
+   quick tiles switches to a **month calendar** (remembered): each day shows
+   what was spent on it, below it the day and the month so far, then the
+   selected day's bookings; swipe or the arrows change the month within the
+   loaded year, and *+ Entry* books on the selected day. Tap a row to edit it (queued rows
    and rows already in the file alike, the file row is rewritten in place);
    the **+** on a row tops it up ("+6 Glühwein": amount added, detail appended
    to the note). *New entry* has category, description autocomplete, amount,

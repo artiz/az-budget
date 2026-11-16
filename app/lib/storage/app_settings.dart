@@ -29,6 +29,7 @@ class AppSettings extends ChangeNotifier {
   static const _kBackupsKept = 'backups_kept';
   static const _kInAppCamera = 'in_app_camera';
   static const _kAutoCapture = 'auto_capture';
+  static const _kCalendarView = 'calendar_view';
   static const _kSavePhotos = 'save_photos';
   static const _kCurrency = 'currency';
   // Early warnings before Monatslimit 1 and 2; limit 1 keeps the keys it
@@ -130,6 +131,13 @@ class AppSettings extends ChangeNotifier {
   bool get autoCapture => _prefs.getBool(_kAutoCapture) ?? true;
   Future<void> setAutoCapture(bool on) async {
     await _prefs.setBool(_kAutoCapture, on);
+    notifyListeners();
+  }
+
+  /// The bookings screen shows the month calendar instead of the list.
+  bool get calendarView => _prefs.getBool(_kCalendarView) ?? false;
+  Future<void> setCalendarView(bool on) async {
+    await _prefs.setBool(_kCalendarView, on);
     notifyListeners();
   }
 

@@ -120,6 +120,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noEntries => 'Записей пока нет.';
 
   @override
+  String get calendarView => 'Календарь';
+
+  @override
+  String get listView => 'Список';
+
+  @override
+  String dayExpenses(String date) {
+    return 'Расходы $date';
+  }
+
+  @override
+  String monthToDate(String date) {
+    return 'Месяц до $date';
+  }
+
+  @override
+  String get noEntriesDay => 'В этот день записей нет.';
+
+  @override
   String get noFileLoaded => 'Файл бюджета не загружен.';
 
   @override

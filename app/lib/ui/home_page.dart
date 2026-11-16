@@ -21,9 +21,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _index = 0;
 
+  /// The day selected in the calendar view, if it is shown.
+  final _calendarDay = ValueNotifier<DateTime?>(null);
+
+  @override
+  void dispose() {
+    _calendarDay.dispose();
+    super.dispose();
+  }
+
   Future<void> _newEntry() async {
     final budget = AppScope.of(context).budget;
-    final entry = await showEntrySheet(context, budget: budget);
+    final day = _calendarDay.value;
+    final entry = await showEntrySheet(context, budget: budget, draft: day == null ? null : EntryDraft(date: day));
     if (entry == null || !mounted) return;
     await saveNewEntry(context, budget, entry);
   }
@@ -64,7 +74,7 @@ class _HomePageState extends State<HomePage> {
     final l = AppLocalizations.of(context);
     final scope = AppScope.of(context);
     final pages = [
-      EntriesPage(budget: scope.budget, onOpenSettings: () => setState(() => _index = 2)),
+      EntriesPage(budget: scope.budget, onOpenSettings: () => setState(() => _index = 2), calendarDay: _calendarDay),
       OverviewPage(budget: scope.budget),
       const SettingsPage(),
     ];
