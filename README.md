@@ -1,6 +1,6 @@
 # AZ Budget
 
-[Get it on Google Play](https://play.google.com/store/apps/details?id=dev.artiz.az_budget&hl=en)
+[Deutsch](README_DE.md) · [Get it on Google Play](https://play.google.com/store/apps/details?id=dev.artiz.az_budget&hl=en)
 
 No account, no server, no ads.
 
@@ -25,8 +25,8 @@ statement PDF ──► docling.rs text layer (rows) ──┴► OpenAI (gpt-4.
                        local queue ◄─────────────────┘
                             │ sync (like a Drive client)
                             ▼
-          Budget <year>.xlsx in the chosen folder: sheet "Buchungen" gets new rows,
-          "Übersicht" inputs are editable, "Einstellungen" holds categories + limits
+          Budget <year>.xlsx in the chosen folder: sheet "Entries" gets new rows,
+          "Overview" inputs are editable, "Settings" holds categories + limits
 ```
 
 ## The spreadsheet is the database
@@ -34,19 +34,20 @@ statement PDF ──► docling.rs text layer (rows) ──┴► OpenAI (gpt-4.
 One file per year. A new user gets it from a bundled template
 (`app/assets/templates/budget_{de,en,ru}.xlsx`, built by
 `tools/budget_template.py`); the layout below is the contract, shown with
-the German names. The English and Russian templates use the same layout with
-translated sheet names, labels and categories, and the reader finds every
+the English names. The German and Russian templates use the same layout with
+translated sheet names, labels and categories (the German names are in
+[README_DE.md](README_DE.md)), and the reader finds every
 row by what its label means (`app/lib/budget/budget_labels.dart`), so a
 file in any of the three languages, or one with renamed sheets, reads the
 same way. Category names are never hard-coded; they come from the file.
 
 | Sheet | Contract |
 | --- | --- |
-| `Buchungen` | Row 1 header, then `A` Datum, `B` Monat (formula), `C` Kategorie, `D` Beschreibung, `E` Betrag (€), `F` Notiz. Expenses positive, income negative. Rows are pre-formatted to 2000; the app fills the next empty one (and creates rows beyond 2000 when needed). |
-| `Übersicht` | Input rows found by their label in column `A` (`Kontostand Monatsanfang…`, `Sparkonto`, `Kreditkarte offen…`), months in `B..M`; the `Plan` block from the row labelled `Plan` to `Summe Plan`. Everything else is formulas. |
-| `Einstellungen` | Categories below the `Kategorie` header (`A` name, `B` Typ: Ausgabe / Einnahme / Umbuchung, `D` hint, `E` icon and colour as chosen in the app, e.g. `basket #FF2E7E`); label/value settings in `F`/`G` (`Monatslimit 1/2`, `Ausgabenlimit 1/2/3`). New settings may be appended below; the app reads whatever is there. |
-| `Verlauf` | Month labels `YYYY-MM`; the app only re-targets them when it creates a new year. |
-| `Regeln` | Optional. Below the `Muster` header: `A` pattern (case-insensitive, `*` for anything), `B` category, `C` description. The statement import and the receipt scan check these before the learned history and before the model; "save as rule" in the import review appends here (the sheet is created in an old file). |
+| `Entries` | Row 1 header, then `A` Date, `B` Month (formula), `C` Category, `D` Description, `E` Amount (€), `F` Note. Expenses positive, income negative. Rows are pre-formatted to 2000; the app fills the next empty one (and creates rows beyond 2000 when needed). |
+| `Overview` | Input rows found by their label in column `A` (`Balance at start of month…`, `Savings account`, `Credit card open…`), months in `B..M`; the `Plan` block from the row labelled `Plan` to `Total plan`. Everything else is formulas. |
+| `Settings` | Categories below the `Category` header (`A` name, `B` type: Expense / Income / Transfer, `D` hint, `E` icon and colour as chosen in the app, e.g. `basket #FF2E7E`); label/value settings in `F`/`G` (`Month limit 1/2`, `Expense limit 1/2/3`). New settings may be appended below; the app reads whatever is there. |
+| `History` | Month labels `YYYY-MM`; the app only re-targets them when it creates a new year. |
+| `Rules` | Optional. Below the `Pattern` header: `A` pattern (case-insensitive, `*` for anything), `B` category, `C` description. The statement import and the receipt scan check these before the learned history and before the model; "save as rule" in the import review appends here (the sheet is created in an old file). |
 
 The app never re-serialises the workbook. It patches individual cells in the
 sheet XML inside the zip (`app/lib/budget/xlsx_workbook.dart`) and copies every
@@ -56,7 +57,7 @@ formats, the table, data validation, comments and charts survive. It sets
 this against a generated file and a LibreOffice-resaved copy.
 
 Nothing about categories or quick entries is hard-coded: the category list,
-the per-category autocomplete ("S" → "Spar" under Lebensmittel), the quick
+the per-category autocomplete ("S" → "Spar" under Groceries), the quick
 tiles on the home screen (most used category + description pairs with their
 last amount) and the category guessed for a scanned merchant all come from
 the bookings in the file.
@@ -96,16 +97,17 @@ the bookings in the file.
    search field, paged by 20 as you scroll. The calendar button next to the
    quick tiles switches to a **month calendar** (remembered): each day shows
    its money flow with sign and currency (spending "-424 €", payday
-   "+3 200 €" in green; transfers left out), below it Einnahmen, Ausgaben
-   and Saldo of the day and of the month so far (the overview's sums and
+   "+3 200 €" in green; transfers left out), below it income, expenses
+   and balance of the day and of the month so far (the overview's sums and
    colours), then the
    selected day's bookings; swipe or the arrows change the month within the
    loaded year, and *+ Entry* books on the selected day. Tap a row to edit it (queued rows
    and rows already in the file alike, the file row is rewritten in place);
-   the **+** on a row tops it up ("+6 Glühwein": amount added, detail appended
+   the **+** on a row tops it up ("+6 mulled wine": amount added, detail appended
    to the note). *New entry* has category, description autocomplete, amount,
    note and date (category pickers list the categories alphabetically, the
-   most used one is preselected); income is typed as a plain number and
+   most used one is preselected; a missing category or amount is said at
+   that field); income is typed as a plain number and
    stored negative. A long press on the *+ Entry* button opens a menu with
    every way in: by hand, receipt photo, image from the gallery, statement
    PDF. A new
@@ -120,7 +122,7 @@ the bookings in the file.
    menu in the status line switches to another file, and when a new year has
    no file yet a banner offers to create `Budget <year>.xlsx` from the latest
    file (categories, settings and plan kept, bookings and account inputs
-   cleared; `Verlauf` is left to the laptop).
+   cleared; `History` is left to the laptop).
 3. **Camera button**: photograph a receipt. docling.rs OCR + the parser
    propose one booking: merchant as description, total as amount, the line
    items in the note, the category from the file's history for that merchant.
@@ -141,7 +143,7 @@ the bookings in the file.
 5. **PDF button**: a bank statement → docling.rs text layer (rebuilt as rows:
    text, value date, amount) → the rows are read deterministically: date and
    amount exactly as printed, merchant from the row or its detail line,
-   card bills as Kreditkarte transfers, cash withdrawals and own transfers
+   card bills as credit-card transfers, cash withdrawals and own transfers
    skipped. The category comes from the file's own history for that merchant;
    only merchants the file has never seen go to OpenAI, in one small request
    for their category. Without an API key those rows are simply flagged for
@@ -149,13 +151,13 @@ the bookings in the file.
    marked *already booked* and unticked. Nothing is written before *Add n*.
    Free text (screenshots) still goes to the model as a whole.
 6. **Overview**: income, expenses with a traffic light against
-   `Monatslimit 1/2` (green, amber from limit 1, red from limit 2; the same
-   icon sits in the top bar of the home screen), saldo, per-category actual
+   `Month limit 1/2` (green, amber from limit 1, red from limit 2; the same
+   icon sits in the top bar of the home screen), balance (saldo), per-category actual
    vs plan with a pencil to edit the month's plan, and the input rows of
-   `Übersicht` (Kontostand, Sparkonto, Kreditkarte offen) editable per month;
+   `Overview` (balance, savings account, credit card open) editable per month;
    those accept a small formula (`=500+232,23`) that is kept in the cell.
    Tapping the expenses card edits the two month limits (written to
-   `Einstellungen`). The app posts a system notification once the calendar
+   `Settings`). The app posts a system notification once the calendar
    month's expenses reach limit 1, and again at limit 2; before each of them
    an optional early warning ("reaching limit 1/2") when they come within a
    margin of that limit, by default 5 % of it, set separately for each limit
@@ -166,13 +168,13 @@ the bookings in the file.
    **Settings → Language** overrides the system language (German, English,
    Russian).
 8. **Settings → Categories**: name, type, hint, icon (from a built-in set)
-   and colour of every category, stored in the file's `Einstellungen` sheet,
+   and colour of every category, stored in the file's `Settings` sheet,
    plus *Add category* (several income categories, several credit cards). A
    rename follows into the bookings, the overview rows, the formulas that
    quote the name (income and transfer categories) and the conditional
    format of the entries sheet. A changed or added type rebuilds the
-   overview's `Einnahmen` row (sum over every income category) and
-   `Ausgaben` row (everything but income and transfer categories), blanks or
+   overview's `Income` row (sum over every income category) and
+   `Expenses` row (everything but income and transfer categories), blanks or
    restores the category's row in the actual block, extends the category
    dropdown of the entries sheet and clones the grey-italic format of
    transfer rows. A new *expense* category gets no row of its own in the
@@ -182,11 +184,11 @@ the bookings in the file.
    overview/history labels into the app language; bookings are renamed with
    their categories, the user's own texts and the sheet names stay (formulas
    refer to the sheet names, and the entries table definition to its header).
-   **File version**: the settings sheet carries a `Dateiversion` row (the
+   **File version**: the settings sheet carries a `File version` row (the
    templates write 2; a file without the row is version 1, the layout this
    app started with). Settings shows the loaded file's version and, for an
    older file, an *Update* button that adds what is missing in the file's
-   language: the `Regeln` sheet, the `Symbol & Farbe` column header, the
+   language: the `Rules` sheet, the `Icon & colour` column header, the
    limit settings of the template, the version row. Existing rows, labels
    and formulas are left alone; the update is idempotent.
 9. **Share into the app**: AZ Budget is a share target for PDFs, images and
@@ -208,12 +210,12 @@ the bookings in the file.
 11. **Split a receipt**: the entry sheet of a scanned receipt offers *Split by
     category*: give each item a category and one booking per category is
     saved, the items in the notes, a rounding remainder with the main one.
-    The scanned file (photo or PDF) goes to `Belege/<year>/` next to the
-    budget files and is linked from the note (*Settings → Data*).
+    The scanned file (photo or PDF) goes to `Belege/<year>/` ("receipts";
+    the folder name is the same in every language) next to the budget files and is linked from the note (*Settings → Data*).
 12. **Year view**: the month menu of *Overview* has a *Year* entry. Swipes
     walk one step at a time through "… Nov 2025, Dec 2025, Year 2025,
     Jan 2026 …" across the year files in the folder. The view shows twelve
-    months as bars (colour = limit, plan grey, line = cumulated saldo) and
+    months as bars (colour = limit, plan grey, line = cumulated balance) and
     every category's actual / plan / previous year (from `Budget <year-1>.xlsx`).
     Tapping a category opens its year: the months with an amount (a tap on
     one opens that month) and the descriptions with count and sum.
@@ -224,7 +226,7 @@ the bookings in the file.
 14. **Settings → Data**: currency symbol (the file carries none), CSV export
     of the loaded year into the folder; *Overview* shares a text summary of
     the month.
-15. **Overview**: under the Saldo a bar per expense category for the month,
+15. **Overview**: under the balance a bar per expense category for the month,
    the plan in grey with the actual amount over it in the category's colour,
    icons on the x axis, the largest on the right; tapping a bar shows its
    name and numbers.
@@ -307,7 +309,7 @@ rust/receipt_ocr/target/release/receipt-ocr \
 ```
 
 ```bash
-rust/receipt_ocr/target/release/receipt-ocr --pdf-text Kontoauszug.pdf
+rust/receipt_ocr/target/release/receipt-ocr --pdf-text statement.pdf
 ```
 
 ```bash
@@ -381,6 +383,9 @@ libonnxruntime ≥ 1.17.
   `billa_ebon`, a synthetic digital receipt PDF read through
   `receipt-ocr --pdf-lines`, where quantity lines sit above their item),
   money parsing, row grouping, RKSV QR, categoriser.
+* `app/test/calendar_view_test.dart` and `entry_form_validation_test.dart`:
+  the calendar view (day amounts, income/expenses/balance as on the
+  overview, 360 dp phones) and the entry form's hints at the fields.
 * `app/test/share_receiver_test.dart`: the queue of shared files.
 * `cargo test` in `rust/receipt_ocr` covers the C ABI contract.
 
@@ -404,9 +409,11 @@ Dart tests to see what moved before committing the new fixtures.
    the gross amount per VAT rate and the register/receipt ids; OCR only fills
    in merchant and items. Decoding is pure Rust (`rqrr`) on the full-resolution
    photo.
-3. **Dictionaries, German first.** Total rows (`SUMME`, `TOTAL`, `Gesamt`,
-   `zu zahlen`…), non-item rows (`MwSt`, `Netto`, `Bar`, `Rückgeld`, card
-   terminal lines…), date priority, payment (card words win over cash words),
+3. **Dictionaries, German first.** Receipts here are mostly Austrian and
+   German, so the words the parser looks for are too: total rows (`SUMME`,
+   `TOTAL`, `Gesamt` (total), `zu zahlen` (to pay)…), non-item rows (`MwSt`
+   (VAT), `Netto` (net), `Bar` (cash), `Rückgeld` (change), card terminal
+   lines…), date priority, payment (card words win over cash words),
    VAT tables resolved by arithmetic (net + VAT = gross).
 4. **Items.** Rows between the header and the total with a price at the right
    edge; multi-line items, quantity lines (`= 2 x 1,89`) and OCR slips are
@@ -424,8 +431,6 @@ Dart tests to see what moved before committing the new fixtures.
   Android-only. iCloud Drive
   works through Apple's Android client only where that exists; Dropbox and
   Google Drive expose their folders through their Android apps.
-* Edits of bookings already in the file are done in the spreadsheet, not in
-  the app; the app edits only its queued entries and the overview inputs.
 * A statement that is a scanned image (no text layer) is reported as empty;
   photograph the page instead (screenshot path).
 * The five sample receipt photos are previews whose QR codes are too small to
