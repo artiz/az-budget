@@ -12,6 +12,7 @@ import '../core/expression.dart';
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
 import 'entry_actions.dart';
+
 import 'package:intl/intl.dart';
 
 import '../storage/share_receiver.dart';
@@ -37,10 +38,10 @@ class _OverviewPageState extends State<OverviewPage> {
 
   /// Leave the year view for one of its months.
   void _openMonth(int year, int month) => setState(() {
-        _year = year;
-        _month = month;
-        _expanded.clear();
-      });
+    _year = year;
+    _month = month;
+    _expanded.clear();
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,10 @@ class _OverviewPageState extends State<OverviewPage> {
       listenable: budget,
       builder: (context, _) {
         if (budget.file == null) {
-          return Scaffold(appBar: AppBar(title: Text(l.tabOverview)), body: EmptyHint(icon: Icons.insights_outlined, text: l.noFileLoaded));
+          return Scaffold(
+            appBar: AppBar(title: Text(l.tabOverview)),
+            body: EmptyHint(icon: Icons.insights_outlined, text: l.noFileLoaded),
+          );
         }
         final year = _year ?? budget.year ?? DateTime.now().year;
         if (year == budget.year) return _build(context, year, budget.file!);
@@ -59,11 +63,17 @@ class _OverviewPageState extends State<OverviewPage> {
           future: budget.fileForYear(year),
           builder: (context, snap) {
             if (snap.connectionState != ConnectionState.done) {
-              return Scaffold(appBar: AppBar(title: Text(l.tabOverview)), body: const Center(child: CircularProgressIndicator()));
+              return Scaffold(
+                appBar: AppBar(title: Text(l.tabOverview)),
+                body: const Center(child: CircularProgressIndicator()),
+              );
             }
             final f = snap.data;
             if (f == null) {
-              return Scaffold(appBar: AppBar(title: Text(l.tabOverview)), body: EmptyHint(icon: Icons.insights_outlined, text: snap.error?.toString() ?? l.noFileLoaded));
+              return Scaffold(
+                appBar: AppBar(title: Text(l.tabOverview)),
+                body: EmptyHint(icon: Icons.insights_outlined, text: snap.error?.toString() ?? l.noFileLoaded),
+              );
             }
             return _build(context, year, f);
           },
@@ -94,10 +104,10 @@ class _OverviewPageState extends State<OverviewPage> {
     // Swipes walk one step through "… Nov 2025, Dec 2025, Year 2025, Jan 2026 …":
     // the months of a year, its year view, then the next year's file.
     void go(int y, int m) => setState(() {
-          _year = y;
-          _month = m;
-          _expanded.clear();
-        });
+      _year = y;
+      _month = m;
+      _expanded.clear();
+    });
     void step(int delta) {
       final ys = [...years]..sort();
       if (delta > 0) {
@@ -118,6 +128,7 @@ class _OverviewPageState extends State<OverviewPage> {
         }
       }
     }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l.tabOverview),
@@ -174,89 +185,86 @@ class _OverviewPageState extends State<OverviewPage> {
           if (v.abs() < 250) return;
           step(v < 0 ? 1 : -1); // swipe left: next month
         },
-        child: yearMode ? _yearBody(context, year, file, all) : ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: l.income,
-                  value: euro(stats.income),
-                  color: scheme.tertiary,
-                  icon: _expanded.contains('\u0000income') ? Icons.expand_less : Icons.expand_more,
-                  showEdit: false,
-                  onTap: () => setState(() => _expanded.contains('\u0000income') ? _expanded.remove('\u0000income') : _expanded.add('\u0000income')),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatCard(
-                  label: l.expenses,
-                  value: euro(stats.expenses),
-                  color: limitColor(context, level),
-                  icon: limitIcon(level),
-                  hint: limit1 == null ? l.limitsTap : l.limitHint(euroShort(limit1), euroShort(limit2 ?? limit1)),
-                  onTap: () => _editLimits(context, budget, year, limit1, limit2),
-                ),
-              ),
-            ],
-          ),
-          if (_expanded.contains('\u0000income'))
-            Card(
-              margin: const EdgeInsets.only(top: 8),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
-                child: _CategoryBreakdown(entries: entries.where((e) => file.category(e.category)?.isIncome ?? false).toList()),
-              ),
-            ),
-          const SizedBox(height: 8),
-          _StatCard(
-            label: l.saldo,
-            value: euro(stats.saldo, showPlus: true),
-            color: stats.saldo >= 0 ? scheme.tertiary : scheme.primary,
-            big: true,
-          ),
-          const SizedBox(height: 8),
-          CategoryChart(bars: CategoryChart.barsFor(file, stats.byCategory, month)),
-          SectionTitle(l.byCategory),
-          Card(
-            child: Column(
-              children: [
-                for (final c in file.expenseCategoriesByName)
-                  if ((stats.byCategory[c.name] ?? 0) != 0 || (file.overview.plan[c.name]?.$2[month - 1] ?? 0) != 0)
-                    _CategoryRow(
-                      name: c.name,
-                      actual: stats.byCategory[c.name] ?? 0,
-                      plan: file.overview.plan[c.name]?.$2[month - 1],
-                      expanded: _expanded.contains(c.name),
-                      onTap: () => setState(() => _expanded.contains(c.name) ? _expanded.remove(c.name) : _expanded.add(c.name)),
-                      onEditPlan: file.overview.plan.containsKey(c.name)
-                          ? () => _editPlan(context, budget, year, c.name, month, file.overview.plan[c.name]!.$2[month - 1], monthName(year, month, locale))
-                          : null,
-                      breakdown: _expanded.contains(c.name) ? _CategoryBreakdown(entries: entries.where((e) => e.category == c.name).toList()) : null,
-                    ),
-                const Divider(),
-                _CategoryRow(name: l.total, actual: stats.expenses, plan: stats.planTotal(file, month), bold: true),
-              ],
-            ),
-          ),
-          SectionTitle(l.accountInputs),
-          Card(
-            child: Column(
-              children: [
-                for (final e in file.overview.rows.entries)
-                  _InputRow(
-                    label: e.key,
-                    value: e.value.$2[month - 1],
-                    formula: file.overview.formulas[e.key]?[month - 1],
-                    onChanged: (v, f) => budget.setOverviewInput(e.key, month, v, formula: f, year: year),
+        child: yearMode
+            ? _yearBody(context, year, file, all)
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          label: l.income,
+                          value: euro(stats.income),
+                          color: scheme.tertiary,
+                          icon: _expanded.contains('\u0000income') ? Icons.expand_less : Icons.expand_more,
+                          showEdit: false,
+                          onTap: () => setState(() => _expanded.contains('\u0000income') ? _expanded.remove('\u0000income') : _expanded.add('\u0000income')),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _StatCard(
+                          label: l.expenses,
+                          value: euro(stats.expenses),
+                          color: limitColor(context, level),
+                          icon: limitIcon(level),
+                          hint: limit1 == null ? l.limitsTap : l.limitHint(euroShort(limit1), euroShort(limit2 ?? limit1)),
+                          onTap: () => _editLimits(context, budget, year, limit1, limit2),
+                        ),
+                      ),
+                    ],
                   ),
-              ],
-            ),
-          ),
-        ],
-      ),
+                  if (_expanded.contains('\u0000income'))
+                    Card(
+                      margin: const EdgeInsets.only(top: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+                        child: _CategoryBreakdown(entries: entries.where((e) => file.category(e.category)?.isIncome ?? false).toList()),
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  _StatCard(label: l.saldo, value: euro(stats.saldo, showPlus: true), color: stats.saldo >= 0 ? scheme.tertiary : scheme.primary, big: true),
+                  const SizedBox(height: 8),
+                  CategoryChart(bars: CategoryChart.barsFor(file, stats.byCategory, month)),
+                  SectionTitle(l.byCategory),
+                  Card(
+                    child: Column(
+                      children: [
+                        for (final c in file.expenseCategoriesByName)
+                          if ((stats.byCategory[c.name] ?? 0) != 0 || (file.overview.plan[c.name]?.$2[month - 1] ?? 0) != 0)
+                            _CategoryRow(
+                              name: c.name,
+                              actual: stats.byCategory[c.name] ?? 0,
+                              plan: file.overview.plan[c.name]?.$2[month - 1],
+                              expanded: _expanded.contains(c.name),
+                              onTap: () => setState(() => _expanded.contains(c.name) ? _expanded.remove(c.name) : _expanded.add(c.name)),
+                              onEditPlan: file.overview.plan.containsKey(c.name)
+                                  ? () => _editPlan(context, budget, year, c.name, month, file.overview.plan[c.name]!.$2[month - 1], monthName(year, month, locale))
+                                  : null,
+                              breakdown: _expanded.contains(c.name) ? _CategoryBreakdown(entries: entries.where((e) => e.category == c.name).toList()) : null,
+                            ),
+                        const Divider(),
+                        _CategoryRow(name: l.total, actual: stats.expenses, plan: stats.planTotal(file, month), bold: true),
+                      ],
+                    ),
+                  ),
+                  SectionTitle(l.accountInputs),
+                  Card(
+                    child: Column(
+                      children: [
+                        for (final e in file.overview.rows.entries)
+                          _InputRow(
+                            label: e.key,
+                            value: e.value.$2[month - 1],
+                            formula: file.overview.formulas[e.key]?[month - 1],
+                            onChanged: (v, f) => budget.setOverviewInput(e.key, month, v, formula: f, year: year),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -291,15 +299,24 @@ extension _YearView on _OverviewPageState {
       planByCategory[p.key] = p.value.$2.fold(0.0, (s, v) => s + (v ?? 0));
     }
     final saldo = income - expenses;
+    // The monthly average is over the months so far: the current year up to
+    // and including this month, a past (or future) year over all twelve.
+    final now = budget.now;
+    final monthsSoFar = year == now.year ? now.month : 12;
+    double avg(double v) => v / monthsSoFar;
     String label(int m) => DateFormat.MMM(locale.toString()).format(DateTime(year, m));
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
         Row(
           children: [
-            Expanded(child: _StatCard(label: l.income, value: euro(income), color: scheme.tertiary, showEdit: false)),
+            Expanded(
+              child: _StatCard(label: l.income, value: euro(income), color: scheme.tertiary, showEdit: false),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: _StatCard(label: l.expenses, value: euro(expenses), color: scheme.primary, showEdit: false, hint: planYear > 0 ? '${l.planLabel} ${euroShort(planYear)}' : null)),
+            Expanded(
+              child: _StatCard(label: l.expenses, value: euro(expenses), color: scheme.primary, showEdit: false, hint: planYear > 0 ? '${l.planLabel} ${euroShort(planYear)}' : null),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -321,11 +338,12 @@ extension _YearView on _OverviewPageState {
             return Card(
               child: Column(
                 children: [
-                  _YearRow(name: '', actual: l.actual, plan: l.planLabel, previous: prev == null ? null : l.previousYear, header: true),
+                  _YearRow(name: '', actual: l.actual, average: l.monthlyAverage, plan: l.planLabel, previous: prev == null ? null : l.previousYear, header: true),
                   for (final name in rows)
                     _YearRow(
                       name: name,
                       actual: euroShort(byCategory[name] ?? 0),
+                      average: euroShort(avg(byCategory[name] ?? 0)),
                       plan: (planByCategory[name] ?? 0) > 0 ? euroShort(planByCategory[name]!) : '–',
                       previous: prev == null ? null : euroShort(prevBy[name] ?? 0),
                       over: (planByCategory[name] ?? 0) > 0 && (byCategory[name] ?? 0) > planByCategory[name]!,
@@ -333,15 +351,18 @@ extension _YearView on _OverviewPageState {
                       expanded: _expanded.contains('year\u0000$name'),
                       onTap: () => _toggle('year\u0000$name'),
                       breakdown: _expanded.contains('year\u0000$name')
-                          ? _YearCategoryBreakdown(
-                              entries: all.where((e) => e.category == name).toList(),
-                              monthLabel: label,
-                              onMonth: (m) => _openMonth(year, m),
-                            )
+                          ? _YearCategoryBreakdown(entries: all.where((e) => e.category == name).toList(), monthLabel: label, onMonth: (m) => _openMonth(year, m))
                           : null,
                     ),
                   const Divider(),
-                  _YearRow(name: l.total, actual: euroShort(expenses), plan: planYear > 0 ? euroShort(planYear) : '–', previous: prev == null ? null : euroShort(prevTotal), bold: true),
+                  _YearRow(
+                    name: l.total,
+                    actual: euroShort(expenses),
+                    average: euroShort(avg(expenses)),
+                    plan: planYear > 0 ? euroShort(planYear) : '–',
+                    previous: prev == null ? null : euroShort(prevTotal),
+                    bold: true,
+                  ),
                 ],
               ),
             );
@@ -352,12 +373,14 @@ extension _YearView on _OverviewPageState {
   }
 }
 
-/// A row of the year table: the category, actual over plan in one column
-/// (two lines), the previous year in its own.
+/// A row of the year table, aligned to the top: the category, then two
+/// columns of two lines each: actual over the monthly average, plan over
+/// the previous year (the plan alone when there is no previous year file).
 class _YearRow extends StatelessWidget {
   const _YearRow({
     required this.name,
     required this.actual,
+    required this.average,
     required this.plan,
     this.previous,
     this.bold = false,
@@ -369,6 +392,7 @@ class _YearRow extends StatelessWidget {
   });
   final String name;
   final String actual;
+  final String average;
   final String plan;
   final String? previous;
   final bool bold;
@@ -385,32 +409,55 @@ class _YearRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final weight = bold || header ? FontWeight.w700 : FontWeight.w400;
     final nameStyle = TextStyle(fontWeight: weight, fontSize: header ? 11 : 14, color: header ? scheme.onSurfaceVariant : null);
-    final actualStyle = TextStyle(fontWeight: bold ? FontWeight.w700 : FontWeight.w600, fontSize: header ? 11 : 14, color: header ? scheme.onSurfaceVariant : (over ? scheme.primary : null));
-    final planStyle = TextStyle(fontWeight: weight, fontSize: header ? 11 : 12, color: scheme.onSurfaceVariant);
+    final headStyle = TextStyle(fontWeight: FontWeight.w700, fontSize: 11, color: scheme.onSurfaceVariant);
+    final topStyle = TextStyle(fontWeight: bold ? FontWeight.w700 : FontWeight.w600, fontSize: 14);
+    final smallStyle = TextStyle(fontWeight: weight, fontSize: 12, color: scheme.onSurfaceVariant);
+    // Two lines: a large number over a small one.
+    Widget pair(String top, String? bottom, {Color? topColor, FontWeight? topWeight}) => Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          top,
+          textAlign: TextAlign.right,
+          maxLines: 1,
+          style: topStyle.copyWith(color: topColor, fontWeight: topWeight),
+        ),
+        if (bottom != null) Text(bottom, textAlign: TextAlign.right, maxLines: 1, style: smallStyle),
+      ],
+    );
     final row = Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (!header && !bold) ...[CategoryDot(name: name), const SizedBox(width: 10)],
-          Expanded(child: Text(name, style: nameStyle, overflow: TextOverflow.ellipsis)),
-          if (onTap != null) ...[Icon(expanded ? Icons.expand_less : Icons.expand_more, size: 18, color: scheme.onSurfaceVariant), const SizedBox(width: 4)],
-          SizedBox(
-            width: 96,
-            child: header
-                ? Text('$actual / $plan', textAlign: TextAlign.right, style: actualStyle)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(actual, textAlign: TextAlign.right, style: actualStyle),
-                      Text(plan, textAlign: TextAlign.right, style: planStyle),
-                    ],
-                  ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Dot and chevron centred on the first line (14 px text).
+        if (!header && !bold) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: CategoryDot(name: name),
           ),
-          if (previous != null) ...[
-            const SizedBox(width: 10),
-            SizedBox(width: 88, child: Text(previous!, textAlign: TextAlign.right, style: header ? actualStyle : planStyle.copyWith(fontSize: 14, fontWeight: weight))),
-          ],
+          const SizedBox(width: 10),
         ],
-      );
+        Expanded(
+          child: Text(name, style: nameStyle, overflow: TextOverflow.ellipsis),
+        ),
+        if (onTap != null) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(expanded ? Icons.expand_less : Icons.expand_more, size: 18, color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(width: 4),
+        ],
+        SizedBox(
+          width: 96,
+          child: header ? Text('$actual / $average', textAlign: TextAlign.right, style: headStyle) : pair(actual, average, topColor: over ? scheme.primary : null),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 88,
+          // Plan as large as the actual amount but lighter: the actual is what stands out.
+          child: header ? Text(previous == null ? plan : '$plan / $previous', textAlign: TextAlign.right, style: headStyle) : pair(plan, previous, topWeight: bold ? FontWeight.w700 : FontWeight.w400),
+        ),
+      ],
+    );
     final body = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: breakdown == null ? row : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [row, breakdown!]),
@@ -439,7 +486,10 @@ class _YearCategoryBreakdown extends StatelessWidget {
     if (entries.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 8),
-        child: Align(alignment: Alignment.centerLeft, child: Text(l.noEntries, style: small)),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(l.noEntries, style: small),
+        ),
       );
     }
     final byMonth = <int, double>{};
@@ -478,13 +528,21 @@ class _YearCategoryBreakdown extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  Expanded(child: Text(g.$2 > 1 ? '${g.$1} ×${g.$2}' : g.$1, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)),
-                  Text(euro(g.$3), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFeatures: [FontFeature.tabularFigures()])),
+                  Expanded(
+                    child: Text(g.$2 > 1 ? '${g.$1} ×${g.$2}' : g.$1, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                  ),
+                  Text(
+                    euro(g.$3),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFeatures: [FontFeature.tabularFigures()]),
+                  ),
                 ],
               ),
             ),
           if (sorted.length > topDescriptions)
-            Padding(padding: const EdgeInsets.only(top: 2), child: Text(l.moreDescriptions(sorted.length - topDescriptions), style: small)),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(l.moreDescriptions(sorted.length - topDescriptions), style: small),
+            ),
         ],
       ),
     );
@@ -564,25 +622,30 @@ class _StatCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(label, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.w500))),
-                if (icon != null) Icon(icon, size: 18, color: color),
-                if (onTap != null && showEdit) ...[
-                  const SizedBox(width: 6),
-                  Icon(Icons.edit_outlined, size: 32, color: scheme.onSurfaceVariant),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  if (icon != null) Icon(icon, size: 18, color: color),
+                  if (onTap != null && showEdit) ...[const SizedBox(width: 6), Icon(Icons.edit_outlined, size: 32, color: scheme.onSurfaceVariant)],
                 ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(value, style: TextStyle(fontSize: big ? 28 : 20, fontWeight: FontWeight.w700, color: color, fontFeatures: const [FontFeature.tabularFigures()])),
-            if (hint != null) Text(hint!, style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant)),
-          ],
-        ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(fontSize: big ? 28 : 20, fontWeight: FontWeight.w700, color: color, fontFeatures: const [FontFeature.tabularFigures()]),
+              ),
+              if (hint != null) Text(hint!, style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant)),
+            ],
+          ),
         ),
       ),
     );
@@ -632,9 +695,18 @@ Future<void> _editLimits(BuildContext context, BudgetService budget, int year, d
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(controller: c1, autofocus: true, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l.monthLimit1, suffixText: '€', helperText: l.monthLimit1Hint)),
+          TextField(
+            controller: c1,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: l.monthLimit1, suffixText: '€', helperText: l.monthLimit1Hint),
+          ),
           const SizedBox(height: 10),
-          TextField(controller: c2, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: l.monthLimit2, suffixText: '€', helperText: l.monthLimit2Hint)),
+          TextField(
+            controller: c2,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: l.monthLimit2, suffixText: '€', helperText: l.monthLimit2Hint),
+          ),
         ],
       ),
       actions: [
@@ -678,47 +750,41 @@ class _CategoryRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              if (!bold) ...[CategoryDot(name: name), const SizedBox(width: 10)],
-              Expanded(child: Text(name, style: style, overflow: TextOverflow.ellipsis)),
-              if (onTap != null) Icon(expanded ? Icons.expand_less : Icons.expand_more, size: 18, color: scheme.onSurfaceVariant),
-              if (onTap != null) const SizedBox(width: 4),
-              Text(euro(actual), style: style.copyWith(color: over ? scheme.primary : null)),
-              if (plan != null) ...[
-                const SizedBox(width: 6),
-                Text('/ ${euroShort(plan!)}', style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-              ],
-              if (onEditPlan != null)
-                InkWell(
-                  onTap: onEditPlan,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
-                    child: Icon(Icons.edit_outlined, size: 32, color: scheme.onSurfaceVariant),
-                  ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                if (!bold) ...[CategoryDot(name: name), const SizedBox(width: 10)],
+                Expanded(
+                  child: Text(name, style: style, overflow: TextOverflow.ellipsis),
                 ),
-            ],
-          ),
-          if (ratio != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: ratio,
-                  minHeight: 4,
-                  backgroundColor: scheme.surfaceContainerHighest,
-                  color: over ? scheme.primary : scheme.tertiary,
+                if (onTap != null) Icon(expanded ? Icons.expand_less : Icons.expand_more, size: 18, color: scheme.onSurfaceVariant),
+                if (onTap != null) const SizedBox(width: 4),
+                Text(euro(actual), style: style.copyWith(color: over ? scheme.primary : null)),
+                if (plan != null) ...[const SizedBox(width: 6), Text('/ ${euroShort(plan!)}', style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant))],
+                if (onEditPlan != null)
+                  InkWell(
+                    onTap: onEditPlan,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
+                      child: Icon(Icons.edit_outlined, size: 32, color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+              ],
+            ),
+            if (ratio != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(value: ratio, minHeight: 4, backgroundColor: scheme.surfaceContainerHighest, color: over ? scheme.primary : scheme.tertiary),
                 ),
               ),
-            ),
-          ?breakdown,
-        ],
-      ),
+            ?breakdown,
+          ],
+        ),
       ),
     );
   }
@@ -738,7 +804,10 @@ class _CategoryBreakdown extends StatelessWidget {
     if (entries.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 8),
-        child: Align(alignment: Alignment.centerLeft, child: Text(l.noEntries, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant))),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(l.noEntries, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+        ),
       );
     }
     final groups = <String, (String, int, double)>{};
@@ -760,8 +829,13 @@ class _CategoryBreakdown extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  Expanded(child: Text(g.$2 > 1 ? '${g.$1} ×${g.$2}' : g.$1, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)),
-                  Text(euro(g.$3), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFeatures: [FontFeature.tabularFigures()])),
+                  Expanded(
+                    child: Text(g.$2 > 1 ? '${g.$1} ×${g.$2}' : g.$1, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                  ),
+                  Text(
+                    euro(g.$3),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFeatures: [FontFeature.tabularFigures()]),
+                  ),
                 ],
               ),
             ),
@@ -777,7 +851,9 @@ class _CategoryBreakdown extends StatelessWidget {
                     children: [
                       Text(dateDm(e.date), style: small),
                       const SizedBox(width: 8),
-                      Expanded(child: Text([e.description, if (e.note.isNotEmpty) oneLine(e.note)].join(' · '), style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(
+                        child: Text([e.description, if (e.note.isNotEmpty) oneLine(e.note)].join(' · '), style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
                       Text(euro(e.amount), style: small.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
                     ],
                   ),
@@ -833,7 +909,10 @@ class _InputRow extends StatelessWidget {
       dense: true,
       title: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: formula == null ? null : Text(formula!, style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant)),
-      trailing: Text(value == null ? '–' : euro(value!), style: TextStyle(fontWeight: FontWeight.w600, color: value == null ? scheme.onSurfaceVariant : scheme.onSurface)),
+      trailing: Text(
+        value == null ? '–' : euro(value!),
+        style: TextStyle(fontWeight: FontWeight.w600, color: value == null ? scheme.onSurfaceVariant : scheme.onSurface),
+      ),
       onTap: () => _edit(context),
     );
   }

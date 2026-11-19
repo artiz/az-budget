@@ -851,7 +851,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get previousYear => 'Vorjahr';
 
   @override
-  String get yearByCategory => 'Nach Kategorie: Ist / Plan / Vorjahr';
+  String get yearByCategory => 'Nach Kategorie: Ist / Ø Monat · Plan / Vorjahr';
+
+  @override
+  String get monthlyAverage => 'Ø Monat';
 
   @override
   String get tilePinned =>

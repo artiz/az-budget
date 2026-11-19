@@ -621,7 +621,8 @@
   "cameraHintHold": "Hold still…",
   "cameraHintManual": "Tap the shutter to take the photo",
   "previousYear": "Prev. year",
-  "yearByCategory": "By category: actual / plan / previous year",
+  "yearByCategory": "By category: actual / Ø month · plan / previous year",
+  "monthlyAverage": "Ø month",
   "tilePinned": "Pinned to quick entries (long-press to unpin)",
   "tileUnpinned": "Unpinned",
   "currentMonth": "Current month"
