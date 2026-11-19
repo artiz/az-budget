@@ -1513,8 +1513,14 @@ abstract class AppLocalizations {
   /// No description provided for @yearByCategory.
   ///
   /// In en, this message translates to:
-  /// **'By category: actual / plan / previous year'**
+  /// **'By category: actual / Ø month · plan / previous year'**
   String get yearByCategory;
+
+  /// No description provided for @monthlyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Ø month'**
+  String get monthlyAverage;
 
   /// No description provided for @tilePinned.
   ///

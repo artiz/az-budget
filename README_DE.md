@@ -236,7 +236,9 @@ Datei.
     Wischen geht Schritt für Schritt durch „… Nov 2025, Dez 2025, Jahr 2025,
     Jan 2026 …“ über die Jahresdateien im Ordner. Die Ansicht zeigt zwölf
     Monate als Balken (Farbe = Limit, Plan grau, Linie = kumuliertes Saldo)
-    und für jede Kategorie Ist / Plan / Vorjahr (aus `Budget <Jahr-1>.xlsx`).
+    und für jede Kategorie das Ist über dem Monatsdurchschnitt (über die
+    Monate bisher: im laufenden Jahr bis zum aktuellen Monat, ein vergangenes
+    Jahr über 12) und den Plan über dem Vorjahr (aus `Budget <Jahr-1>.xlsx`).
     Ein Tipp auf eine Kategorie öffnet ihr Jahr: die Monate mit einem Betrag
     (ein Tipp darauf öffnet den Monat) und die Beschreibungen mit Anzahl und
     Summe.

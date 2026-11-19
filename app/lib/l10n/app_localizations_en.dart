@@ -847,7 +847,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousYear => 'Prev. year';
 
   @override
-  String get yearByCategory => 'By category: actual / plan / previous year';
+  String get yearByCategory =>
+      'By category: actual / Ø month · plan / previous year';
+
+  @override
+  String get monthlyAverage => 'Ø month';
 
   @override
   String get tilePinned => 'Pinned to quick entries (long-press to unpin)';

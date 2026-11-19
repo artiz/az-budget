@@ -216,7 +216,9 @@ the bookings in the file.
     walk one step at a time through "… Nov 2025, Dec 2025, Year 2025,
     Jan 2026 …" across the year files in the folder. The view shows twelve
     months as bars (colour = limit, plan grey, line = cumulated balance) and
-    every category's actual / plan / previous year (from `Budget <year-1>.xlsx`).
+    for every category its actual amount over the monthly average (over the
+    months so far: the current year up to this month, a past year over 12)
+    and its plan over the previous year (from `Budget <year-1>.xlsx`).
     Tapping a category opens its year: the months with an amount (a tap on
     one opens that month) and the descriptions with count and sum.
 13. **Widget and shortcuts**: a home-screen widget shows the month's

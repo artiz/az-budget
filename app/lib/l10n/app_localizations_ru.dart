@@ -847,7 +847,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get previousYear => 'Прошлый год';
 
   @override
-  String get yearByCategory => 'По категориям: факт / план / прошлый год';
+  String get yearByCategory =>
+      'По категориям: факт / Ø в месяц · план / прошлый год';
+
+  @override
+  String get monthlyAverage => 'Ø в месяц';
 
   @override
   String get tilePinned =>
